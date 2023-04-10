@@ -1,14 +1,18 @@
 import {BootMixin} from '@loopback/boot';
 import {ApplicationConfig} from '@loopback/core';
+import {RepositoryMixin} from '@loopback/repository';
+import {RestApplication} from '@loopback/rest';
 import {
   RestExplorerBindings,
   RestExplorerComponent,
 } from '@loopback/rest-explorer';
-import {RepositoryMixin} from '@loopback/repository';
-import {RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
+import {MongoDbDataSource} from './datasources';
+import {DEVICE_SERVICE} from './keys';
+import {DeviceRepository} from './repositories';
 import {MySequence} from './sequence';
+import {DeviceService} from './services';
 
 export {ApplicationConfig};
 
@@ -20,6 +24,7 @@ export class DataloggerSeverApplication extends BootMixin(
 
     // Set up the custom sequence
     this.sequence(MySequence);
+
 
     // Set up default home page
     this.static('/', path.join(__dirname, '../public'));
@@ -40,5 +45,8 @@ export class DataloggerSeverApplication extends BootMixin(
         nested: true,
       },
     };
+    this.bind("datasources.MongoDB").toClass(MongoDbDataSource)
+    this.bind("repositories.DeviceRepository").toClass(DeviceRepository)
+    this.bind(DEVICE_SERVICE).toClass(DeviceService);
   }
 }
