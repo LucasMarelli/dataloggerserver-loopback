@@ -13,7 +13,35 @@ export class Device extends Entity {
     type: 'string',
     default: "not_connected",
   })
-  status?: string;
+  status?: "not_connected" | "connected";
+
+  @property({
+    type: 'string',
+  })
+  name?: string;
+
+  @property({
+    type: 'string',
+  })
+  mqttId?: string;
+
+  @property({
+    type: 'date',
+    dafault: new Date()
+  })
+  createdAt?: Date;
+
+  @property({
+    type: 'date',
+    dafault: new Date()
+  })
+  lastConnection?: Date;
+
+  @property({
+    type: 'date',
+    dafault: new Date()
+  })
+  lastDisconnection?: Date;
 
   // Define well-known properties here
 
