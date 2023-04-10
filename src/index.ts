@@ -17,6 +17,7 @@ export async function main(options: ApplicationConfig = {}) {
   // const deviceService = await app.get("services.device.service")
   // const deviceRepository = await app.getRepository(DeviceRepository)
   const deviceService = await instantiateClass(DeviceService, app)
+  await deviceService.disconnectAll();
   const mqttPort = 1883
   const aedesPersistenceMongoDB = require('aedes-persistence-mongodb')
   const persistence = aedesPersistenceMongoDB({

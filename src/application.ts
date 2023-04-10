@@ -8,11 +8,7 @@ import {
 } from '@loopback/rest-explorer';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
-import {MongoDbDataSource} from './datasources';
-import {DEVICE_SERVICE} from './keys';
-import {DeviceRepository} from './repositories';
 import {MySequence} from './sequence';
-import {DeviceService} from './services';
 
 export {ApplicationConfig};
 
@@ -45,8 +41,10 @@ export class DataloggerSeverApplication extends BootMixin(
         nested: true,
       },
     };
-    this.bind("datasources.MongoDB").toClass(MongoDbDataSource)
-    this.bind("repositories.DeviceRepository").toClass(DeviceRepository)
-    this.bind(DEVICE_SERVICE).toClass(DeviceService);
+    // this.repository(DeviceRepository)
+    // this.bind("datasources.MongoDB").toClass(MongoDbDataSource)
+    // this.bind("repositories.DeviceRepository").toClass(DeviceRepository)
+    // this.service(DeviceService)
+    // this.bind(DEVICE_SERVICE).toClass(DeviceService);
   }
 }

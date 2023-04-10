@@ -27,4 +27,8 @@ export class DeviceService {
     const now = new Date();
     return await this.deviceRepository.updateAll({status: "not_connected", lastDisconnection: now}, {mqttId})
   }
+
+  async disconnectAll() {
+    return await this.deviceRepository.updateAll({status: "not_connected"})
+  }
 }
