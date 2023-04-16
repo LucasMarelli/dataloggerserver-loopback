@@ -41,10 +41,5 @@ export class DataloggerSeverApplication extends BootMixin(
         nested: true,
       },
     };
-    // this.repository(DeviceRepository)
-    // this.bind("datasources.MongoDB").toClass(MongoDbDataSource)
-    // this.bind("repositories.DeviceRepository").toClass(DeviceRepository)
-    // this.service(DeviceService)
-    // this.bind(DEVICE_SERVICE).toClass(DeviceService);
   }
 }

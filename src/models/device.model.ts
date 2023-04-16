@@ -1,4 +1,5 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, model, property, hasMany} from '@loopback/repository';
+import {Measurement} from './measurement.model';
 
 @model({settings: {strict: false}})
 export class Device extends Entity {
@@ -26,6 +27,16 @@ export class Device extends Entity {
   mqttId?: string;
 
   @property({
+    type: 'string',
+  })
+  unit?: string;
+
+  @property({
+    type: 'number',
+  })
+  samplingTime?: number;
+
+  @property({
     type: 'date',
     dafault: new Date()
   })
@@ -43,6 +54,8 @@ export class Device extends Entity {
   })
   lastDisconnection?: Date;
 
+  @hasMany(() => Measurement)
+  measurements: Measurement[];
   // Define well-known properties here
 
   // Indexer property to allow additional data

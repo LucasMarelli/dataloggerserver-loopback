@@ -1,5 +1,6 @@
 import { /* inject, */ BindingScope, injectable} from '@loopback/core';
 import {repository} from '@loopback/repository';
+import {HttpErrors} from '@loopback/rest';
 import {Device} from '../models';
 import {DeviceRepository} from '../repositories';
 
@@ -7,7 +8,7 @@ import {DeviceRepository} from '../repositories';
 export class DeviceService {
   constructor(
     @repository(DeviceRepository)
-    private deviceRepository: DeviceRepository
+    public deviceRepository: DeviceRepository
   ) { }
   async connect(mqttId: string) {
     const now = new Date()
@@ -30,5 +31,20 @@ export class DeviceService {
 
   async disconnectAll() {
     return await this.deviceRepository.updateAll({status: "not_connected"})
+  }
+
+  async addMeasurement(mqttId: string, value: number) {
+    const now = new Date()
+    const device = await this.deviceRepository.findOne({where: {mqttId}})
+    if (!device) throw new HttpErrors.NotFound("Device Not found")
+    return this.deviceRepository.measurements(device.id).create({createdAt: now, value, unit: device.unit})
+  }
+
+  async findByMqttId(mqttId: string) {
+    return this.deviceRepository.findOne({where: {mqttId}})
+  }
+
+  async updateSamplingTime(id: string, samplingTime: number) {
+    return this.deviceRepository.updateById(id, {samplingTime})
   }
 }
