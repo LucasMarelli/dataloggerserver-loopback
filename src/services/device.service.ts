@@ -1,6 +1,7 @@
 import { /* inject, */ BindingScope, injectable} from '@loopback/core';
 import {repository} from '@loopback/repository';
 import {HttpErrors} from '@loopback/rest';
+import {configService, mqttService} from '..';
 import {Device} from '../models';
 import {DeviceRepository} from '../repositories';
 
@@ -8,7 +9,7 @@ import {DeviceRepository} from '../repositories';
 export class DeviceService {
   constructor(
     @repository(DeviceRepository)
-    public deviceRepository: DeviceRepository
+    public deviceRepository: DeviceRepository,
   ) { }
   async connect(mqttId: string) {
     const now = new Date()
@@ -46,5 +47,11 @@ export class DeviceService {
 
   async updateSamplingTime(id: string, samplingTime: number) {
     return this.deviceRepository.updateById(id, {samplingTime})
+  }
+
+  async updateSamplingTimeAll(samplingTime: number) {
+    await configService.updateSamplingTime(samplingTime)
+    mqttService.publishSamplingTime(samplingTime)
+    return this.deviceRepository.updateAll({samplingTime})
   }
 }

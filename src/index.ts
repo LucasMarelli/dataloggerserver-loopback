@@ -8,16 +8,13 @@ const mongoURL = mongoBaseURL + '/dataloggers'
 const mongoMqttURL = mongoBaseURL + '/mqtt'
 
 export * from './application';
-
+export let mqttService: MqttService
+export let configService: ConfigService
 export async function main(options: ApplicationConfig = {}) {
   const app = new DataloggerSeverApplication(options);
   await app.boot();
   await app.start();
   const bindings = app.find().map((a) => a.key)
-  const deviceService = await instantiateClass(DeviceService, app)
-  await deviceService.disconnectAll();
-  const configService = await instantiateClass(ConfigService, app)
-  const config = await configService.init()
   const mqttPort = 1887
   const aedesPersistenceMongoDB = require('aedes-persistence-mongodb')
   const persistence = aedesPersistenceMongoDB({
@@ -37,10 +34,15 @@ export async function main(options: ApplicationConfig = {}) {
   const aedes = new Aedes({persistence})
   app.bind<Aedes>("aedes").to(aedes);
   const mqttServer = createServer(aedes.handle)
-  const mqttService = await instantiateClass(MqttService, app);
+
   mqttServer.listen(mqttPort, function () {
     console.log('server started and listening on port ', mqttPort)
   })
+  const deviceService = await instantiateClass(DeviceService, app)
+  await deviceService.disconnectAll();
+  configService = await instantiateClass(ConfigService, app)
+  const config = await configService.init()
+  mqttService = await instantiateClass(MqttService, app);
 
   aedes.on('subscribe', mqttService.handlersubscribe)
 

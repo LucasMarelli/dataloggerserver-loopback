@@ -66,5 +66,8 @@ export class MqttService {
     }
 
   }
+  publishSamplingTime(samplingTime: number) {
+    this.aedes.publish({topic: 'device/config/', payload: String(samplingTime)} as PublishPacket, (error) => {if (error) console.error(error)})
+  }
 
 }

@@ -20,4 +20,9 @@ export class ConfigService {
       order: ['id DESC']
     })
   }
+
+  async updateSamplingTime(samplingTime: number) {
+    const config = await this.getConfig()
+    return this.configRepository.updateById(config?.id, {defaultSamplingTime: samplingTime})
+  }
 }

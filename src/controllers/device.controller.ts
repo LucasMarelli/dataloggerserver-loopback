@@ -1,30 +1,45 @@
+import {service} from '@loopback/core';
 import {
   Count,
   CountSchema,
   Filter,
   FilterExcludingWhere,
+  model,
+  property,
   repository,
   Where,
 } from '@loopback/repository';
 import {
-  post,
-  param,
+  del,
   get,
   getModelSchemaRef,
+  param,
   patch,
+  post,
   put,
-  del,
   requestBody,
   response,
 } from '@loopback/rest';
 import {Device} from '../models';
 import {DeviceRepository} from '../repositories';
+import {DeviceService} from '../services';
+
+@model()
+export class SamplingTimeBody {
+  @property({
+    type: 'number',
+    required: true,
+  })
+  samplingTime: number;
+}
 
 export class DeviceController {
   constructor(
     @repository(DeviceRepository)
-    public deviceRepository : DeviceRepository,
-  ) {}
+    public deviceRepository: DeviceRepository,
+    @service(DeviceService)
+    public deviceService: DeviceService
+  ) { }
 
   @post('/devices')
   @response(200, {
@@ -146,5 +161,22 @@ export class DeviceController {
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
     await this.deviceRepository.deleteById(id);
+  }
+
+  @patch('/devices/sampling-time')
+  @response(204, {
+    description: 'Device PATCH success',
+  })
+  async updateSamplingTime(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(SamplingTimeBody),
+        },
+      },
+    })
+    samplingTimeBody: SamplingTimeBody,
+  ): Promise<void> {
+    await this.deviceService.updateSamplingTimeAll(samplingTimeBody.samplingTime);
   }
 }
