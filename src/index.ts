@@ -15,7 +15,7 @@ export async function main(options: ApplicationConfig = {}) {
   await app.boot();
   await app.start();
   const bindings = app.find().map((a) => a.key)
-  const mqttPort = 1887
+  const mqttPort = 1885
   const aedesPersistenceMongoDB = require('aedes-persistence-mongodb')
   const persistence = aedesPersistenceMongoDB({
     url: mongoMqttURL,

@@ -1,18 +1,17 @@
 import { /* inject, */ BindingScope, inject, injectable, service} from '@loopback/core';
 import Aedes, {AedesPublishPacket, Client, PublishPacket, Subscription} from 'aedes';
+import {configService} from '..';
 import {Device} from '../models';
-import {ConfigService} from './config.service';
 import {DeviceService} from './device.service';
 
 @injectable({scope: BindingScope.TRANSIENT})
 export class MqttService {
+  readonly qos = 1;
   constructor(
     @inject("aedes")
     private aedes: Aedes,
     @service(DeviceService)
     private deviceService: DeviceService,
-    @service(ConfigService)
-    private configService: ConfigService
   ) { }
 
   handlersubscribe = (subscriptions: Subscription[], client: Client) => {
@@ -25,19 +24,19 @@ export class MqttService {
     if (client) {
       device = await this.deviceService.connect(client.id)
       if (!device?.samplingTime) {
-        const config = await this.configService.getConfig();
-        if (config?.defaultSamplingTime!) {
+        const config = await configService.getConfig();
+        if (config?.defaultSamplingTime) {
           await this.deviceService.updateSamplingTime(device.id!, config?.defaultSamplingTime)
           device = await this.deviceService.deviceRepository.findById(device.id)
+        } else {
+          console.error("No default sampling time in congig file - Sampling time not setted to device")
         }
-      } else {
-        console.error("No default sampling time in congig file - Sampling time not setted to device")
       }
-      this.aedes.publish({topic: 'device/config/' + client.id, payload: String(device.samplingTime)} as PublishPacket, (error) => {if (error) console.error(error)})
-
+      client.subscribe({topic: "device/config/" + client.id, qos: this.qos}, (error) => {if (error) console.error(error)})
+      if (device.samplingTime) this.publishSamplingTimeToDevice(client.id, device.samplingTime)
     }
     console.log('Client Connected: \x1b[33m' + (client ? client.id : client) + '\x1b[0m', 'to broker', this.aedes.id)
-    this.aedes.publish({topic: 'device/conected', payload: "I'm broker " + this.aedes.id} as PublishPacket, (error) => {if (error) console.error(error)})
+    this.aedes.publish({topic: 'device/conected', payload: "I'm broker " + this.aedes.id, qos: this.qos} as PublishPacket, (error) => {if (error) console.error(error)})
 
   }
 
@@ -67,7 +66,11 @@ export class MqttService {
 
   }
   publishSamplingTime(samplingTime: number) {
-    this.aedes.publish({topic: 'device/config/', payload: String(samplingTime)} as PublishPacket, (error) => {if (error) console.error(error)})
+    this.aedes.publish({topic: 'device/config', payload: String(samplingTime), qos: this.qos} as PublishPacket, (error) => {if (error) console.error(error)})
+  }
+
+  publishSamplingTimeToDevice(mqttId: string, samplingTime: number) {
+    this.aedes.publish({topic: 'device/config/' + mqttId, payload: String(samplingTime), qos: this.qos} as PublishPacket, (error) => {if (error) console.error(error)})
   }
 
 }
