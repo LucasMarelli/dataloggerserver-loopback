@@ -52,13 +52,14 @@ export class MqttService {
       switch (topic) {
         case "device/measurement":
           try {
-            const measurement = await this.deviceService.addMeasurement(client.id, Number(packet.payload))
+            let [value, epochTime] = String(packet.payload).split("/")
+            const date = new Date(Number(epochTime) * 1000)
+            const measurement = await this.deviceService.addMeasurement(client.id, Number(value), date)
           }
           catch (error) {
             console.error(error)
           }
           break;
-
         default:
           break;
       }

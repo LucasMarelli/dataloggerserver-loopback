@@ -34,11 +34,11 @@ export class DeviceService {
     return await this.deviceRepository.updateAll({status: "not_connected"})
   }
 
-  async addMeasurement(mqttId: string, value: number) {
+  async addMeasurement(mqttId: string, value: number, createdAt?: Date) {
     const now = new Date()
     const device = await this.deviceRepository.findOne({where: {mqttId}})
     if (!device) throw new HttpErrors.NotFound("Device Not found")
-    return this.deviceRepository.measurements(device.id).create({createdAt: now, value, unit: device.unit})
+    return this.deviceRepository.measurements(device.id).create({createdAt: createdAt || now, value, unit: device.unit})
   }
 
   async findByMqttId(mqttId: string) {
